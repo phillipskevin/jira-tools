@@ -1,0 +1,24 @@
+{
+  "name": "issue-tracker-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phillipskevin/issue-tracker-tracker.git"
+  },
+  "keywords": [],
+  "author": "Kevin Phillips <kphillips86@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/phillipskevin/issue-tracker-tracker/issues"
+  },
+  "homepage": "https://github.com/phillipskevin/issue-tracker-tracker#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.0"
+  }
+}
