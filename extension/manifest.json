@@ -1,0 +1,19 @@
+{
+    "description": "Track changes in your issue tracker",
+    "manifest_version": 2,
+    "name": "Issue tracker tracker",
+    "version": "0.0.0",
+	"browser_action": {
+		"default_title": "Issue tracker tracker",
+		"default_popup": "popup/index.html"
+	},
+    "content_scripts": [{
+        "all_frames": true,
+        "js": [ "content-script.js" ],
+        "matches": [ "*://*/*" ]
+    }],
+    "devtools_page": "index.html",
+    "web_accessible_resources": [
+        "injected-script.js"
+    ]
+}

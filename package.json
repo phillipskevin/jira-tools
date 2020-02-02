@@ -18,7 +18,10 @@
   },
   "homepage": "https://github.com/phillipskevin/issue-tracker-tracker#readme",
   "dependencies": {
-    "dotenv": "^8.2.0",
-    "node-fetch": "^2.6.0"
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "can": "^6.3.0",
+    "steal-tools": "^2.2.5"
   }
 }
