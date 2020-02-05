@@ -1,31 +1,13 @@
-import { StacheElement } from "../lib/can.js";
 import injectedScript from "../injected-script-wrapper.js";
 
-const toJSON = resp => resp.json();
+const addP = (msg) => {
+    const p = document.createElement("p");
+    p.innerHTML = msg;
+    document.body.appendChild(p);
+};
 
-const styles = `
-    issue-tracker-tracker {
-        display: block;
-        min-width: 400px;
-    }
-`;
-
-class IssueTrackerTracker extends StacheElement {
-    static view = `
-        <style>${styles}</style>
-
-        {{# and(issues, issues.length) }}
-            loaded
-        {{/ and }}
-    `;
-    static props = {
-        issues: {
-            async(resolve) {
-                injectedScript
-                    .getIssues()
-                    .then(resolve);
-            }
-        }
-    };
-}
-customElements.define("issue-tracker-tracker", IssueTrackerTracker);
+const button = document.querySelector("button");
+button.addEventListener("click", async () => {
+    const issues = await injectedScript.issues;
+    console.log(issues);
+});

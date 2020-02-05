@@ -1,9 +1,9 @@
-const port = chrome.runtime.connect({ name: "issue-tracker-tracker" });
+const backgroundScript = chrome.runtime.connect({ name: "issue-tracker-tracker-content-to-background" });
 
-// listen for events dispatched by injected-script
-// and forward them to panel
-document.addEventListener("__ISSUE_TRACKER_TRACKER_EVENT__", function(ev) {
-	port.postMessage(ev.detail);
+// listen for events dispatched by injected-script and send them to
+// the background script to forward them on to the panel
+document.addEventListener("__ISSUE_TRACKER_TRACKER_RESPONSE__", function(ev) {
+	backgroundScript.postMessage(ev.detail);
 });
 
 const s = document.createElement("script");

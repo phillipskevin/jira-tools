@@ -3,6 +3,9 @@
     "manifest_version": 2,
     "name": "Issue tracker tracker",
     "version": "0.0.0",
+    "background": {
+        "scripts": ["background-script.js"]
+    },
 	"browser_action": {
 		"default_title": "Issue tracker tracker",
 		"default_popup": "popup/index.html"
@@ -12,6 +15,7 @@
         "js": [ "content-script.js" ],
         "matches": [ "*://*/*" ]
     }],
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "devtools_page": "index.html",
     "web_accessible_resources": [
         "injected-script.js"
