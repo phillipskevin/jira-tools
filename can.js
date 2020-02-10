@@ -1,7 +1,13 @@
 import {
-	StacheElement
+    StacheElement,
+    ObservableArray,
+    ObservableObject,
+    type
 } from "can";
 
 export {
-	StacheElement
+    StacheElement,
+    ObservableArray,
+    ObservableObject,
+    type
 };

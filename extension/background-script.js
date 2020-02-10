@@ -8,10 +8,6 @@ chrome.runtime.onConnect.addListener((port) => {
                 port.postMessage(msg);
             });
         });
-
-        port.onDisconnect.addListener((port) => {
-            // TODO
-        });
     }
 
     if (port.name === "issue-tracker-tracker-background-to-panel") {

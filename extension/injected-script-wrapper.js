@@ -41,10 +41,6 @@ backgroundScript.onMessage.addListener((msg, port) => {
     }
 });
 
-backgroundScript.onDisconnect.addListener((port) => {
-    // TODO
-});
-
 const wrapper = new Proxy({}, {
     get(target, key) {
         return wrapPropertyInPromiseToFetchData(key);
