@@ -1,10 +1,7 @@
 (() => {
     const JIRA_URLS = {
-        // get `5` from the rapidView URL param
-        activeSprints: `/rest/agile/1.0/board/5/sprint?state=active`,
-        // replace `18` with the `id` property from each sprint returned
-        // in the activeSprints `values` array
-        issues: `/rest/api/2/search?jql=sprint=18`
+        activeSprints: (boardId) => `/rest/agile/1.0/board/${boardId}/sprint?state=active`,
+        issues: (sprintId) => `/rest/api/2/search?jql=sprint=${sprintId}`
     };
 
     const dispatchDataResponse = detail => {
@@ -15,9 +12,20 @@
     };
 
     window.__ISSUE_TRACKER_TRACKER_EXTENSION__ = {
+        get boardId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get("rapidView");
+        },
+
+        get activeSprints() {
+            return fetch(JIRA_URLS.activeSprints(this.boardId))
+                .then((resp) => resp.json())
+                .then(({ values }) => values);
+        },
+
         get issues() {
             // TODO - get all active sprints and get issues for each
-            return fetch(JIRA_URLS.issues)
+            return fetch(JIRA_URLS.issues(18))
                 .then((resp) => resp.json())
                 .then(({ issues }) => {
                     // dispatch will make this value available in the chrome extension
