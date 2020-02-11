@@ -38,32 +38,44 @@ class Issues extends ObservableArray {
     static items = type.convert(Issue);
 }
 
+class Sprint extends ObservableObject {
+    static props = {
+        sprintId: type.convert(Number),
+        issues: type.convert(Issues)
+    };
+}
+
+class Sprints extends ObservableArray {
+    static items = type.convert(Sprint);
+}
+
 class IssueTracker extends StacheElement {
     static view = `
-       <button on:click="this.getIssues()">Refresh Issues</button>
+       <button on:click="this.getSprints()">Refresh Issues</button>
 
-        <h2>Issues</h2>
-        {{# for(issue of issues) }}
-            <p>
-                {{ issue.key }} {{ issue.fields.summary }} - {{ issue.fields.status.name }}
-                {{# if(issue.fields.assignee.displayName) }}({{ issue.fields.assignee.displayName }}){{/ if }}
-            </p>
+        <h2>Active Sprints</h2>
+        {{# for(sprint of this.sprints) }}
+            <h3>{{ sprint.name }}</h3>
+            {{# for(issue of sprint.issues) }}
+                <p>
+                    {{ issue.key }} {{ issue.fields.summary }} - {{ issue.fields.status.name }}
+                    {{# if(issue.fields.assignee.displayName) }}({{ issue.fields.assignee.displayName }}){{/ if }}
+                </p>
+            {{/ for }}
         {{/ for }}
     `;
 
     static props = {
-        issues: type.convert(Issues),
+        sprints: type.convert(Sprints),
 
-        // TODO  - listen to when `issues` changes
-        // and diff statuses
+        // TODO  - listen to when `sprints` changes and diff statuses
         statusChanges: {
-            value({ listenTo, resolve }) {
-            }
+            value({ listenTo, resolve }) { }
         }
     }
 
-    async getIssues() {
-        this.issues = await jiraData.issues;
+    async getSprints() {
+        this.sprints = await jiraData.sprints;
     }
 
     connected() {

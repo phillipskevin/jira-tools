@@ -23,17 +23,35 @@
                 .then(({ values }) => values);
         },
 
-        get issues() {
-            // TODO - get all active sprints and get issues for each
-            return fetch(JIRA_URLS.issues(18))
+        async getIssuesForSprint(sprintId) {
+            return await fetch(JIRA_URLS.issues(sprintId))
                 .then((resp) => resp.json())
-                .then(({ issues }) => {
+                .then(({ issues }) => issues);
+        },
+
+        async getIssuesForActiveSprints() {
+            const activeSprints = await this.activeSprints;
+
+            return await Promise.all(
+                activeSprints.map(async ({ id, name }) => {
+                    return {
+                        id,
+                        name,
+                        issues: await this.getIssuesForSprint(id)
+                    };
+                })
+            );
+        },
+
+        get sprints() {
+            return this.getIssuesForActiveSprints()
+                .then((data) => {
                     // dispatch will make this value available in the chrome extension
                     dispatchDataResponse({
-                        type: "issues",
-                        data: issues
+                        type: "sprints",
+                        data: data
                     });
-                    return issues;
+                    return data;
                 });
         }
     };
