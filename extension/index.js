@@ -1,5 +1,5 @@
 chrome.devtools.panels.create(
-    "Jira Utils",
+    "Jira Tools",
     "",
     "panel/index.html"
 );

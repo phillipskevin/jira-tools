@@ -6,6 +6,12 @@ const handlerMap = {};
 const wrapPropertyInPromiseToFetchData = (key) => {
     return new Promise((resolve, reject) => {
         chrome.devtools.inspectedWindow.eval(
+            // TODO - change this to check if a promise was returned
+            // and then dispatch an event like
+            //      dispatchDataResponse({
+            //          type: "sprints",
+            //          data: data
+            //      });
             `window.__ISSUE_TRACKER_TRACKER_EXTENSION__.${key}`,
             function(result, isException) {
                 if (isException) {

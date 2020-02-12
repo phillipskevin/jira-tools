@@ -46,6 +46,7 @@
         get sprints() {
             return this.getIssuesForActiveSprints()
                 .then((data) => {
+                    // TODO - move this to injected-script-wrapper
                     // dispatch will make this value available in the chrome extension
                     dispatchDataResponse({
                         type: "sprints",

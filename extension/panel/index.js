@@ -36,11 +36,21 @@ class Issue extends ObservableObject {
 
 class Issues extends ObservableArray {
     static items = type.convert(Issue);
+
+    static props = {
+        get flattened() {
+            return this.reduce((flat, issue) => {
+                flat[issue.key] = issue;
+                return flat;
+            }, {});
+        }
+    };
 }
 
 class Sprint extends ObservableObject {
     static props = {
-        sprintId: type.convert(Number),
+        id: Number,
+        name: String,
         issues: type.convert(Issues)
     };
 }
@@ -49,28 +59,63 @@ class Sprints extends ObservableArray {
     static items = type.convert(Sprint);
 }
 
-class IssueTracker extends StacheElement {
+class JiraTools extends StacheElement {
     static view = `
        <button on:click="this.getSprints()">Refresh Issues</button>
 
         <h2>Active Sprints</h2>
         {{# for(sprint of this.sprints) }}
             <h3>{{ sprint.name }}</h3>
-            {{# for(issue of sprint.issues) }}
-                <p>
-                    {{ issue.key }} {{ issue.fields.summary }} - {{ issue.fields.status.name }}
-                    {{# if(issue.fields.assignee.displayName) }}({{ issue.fields.assignee.displayName }}){{/ if }}
-                </p>
-            {{/ for }}
+            <p>{{ sprint.issues.length }} issues</p>
+            <h4>Recent status changes:</h4>
+            {{# if(this.statusChanges[sprint.id].length) }}
+                {{# for(change of this.statusChanges[sprint.id]) }}
+                {{/ for }}
+            {{ else }}
+                None
+            {{/ if }}
         {{/ for }}
     `;
 
     static props = {
         sprints: type.convert(Sprints),
 
-        // TODO  - listen to when `sprints` changes and diff statuses
         statusChanges: {
-            value({ listenTo, resolve }) { }
+            value({ listenTo, resolve }) {
+                const changes = resolve(new ObservableObject());
+                let oldSprints = this.sprints;
+
+                const updateChanges = ({ value: sprints }) => {
+                    sprints.forEach((sprint) => {
+                        const changesForSprint = new ObservableArray();
+
+                        const oldSprint = oldSprints.find((oldSprint) => oldSprint.id === sprint.id);
+                        const oldIssues = oldSprint.issues;
+
+                        sprint.issues.forEach((issue) => {
+                            const oldIssue = oldIssues.flattened[issue.key];
+                            console.log(issue.key, "OLD status:", oldIssue.fields.status.name, "NEW status:", issue.fields.status.name);
+                            if (!oldIssue || oldIssue.fields.status.name !== issue.fields.status.name) {
+                                changesForSprint.push(new ObservableObject({
+                                    oldStatus: oldIssue.fields.status.name,
+                                    newStatus: issue.fields.status.name,
+                                    key: issue.key
+                                }));
+                            }
+                        });
+
+                        changes[sprint.id] = changesForSprint;
+                    });
+
+                    oldSprints = sprints;
+                };
+
+                // set default value
+                updateChanges({ value: oldSprints });
+
+                // update value when sprints changes
+                listenTo("sprints", updateChanges);
+            }
         }
     }
 
@@ -79,8 +124,14 @@ class IssueTracker extends StacheElement {
     }
 
     connected() {
-        // TODO - load issues from localStorage
-        // and set up a listener to set then in localStorage
+        const savedSprints = localStorage.getItem("saved-sprints");
+        if (savedSprints) {
+            this.sprints = JSON.parse(savedSprints);
+        }
+
+        this.listenTo("sprints", ({ value }) => {
+            localStorage.setItem("saved-sprints", JSON.stringify(value.serialize()));
+        })
     }
 }
-customElements.define("issue-tracker", IssueTracker);
+customElements.define("jira-tools", JiraTools);
