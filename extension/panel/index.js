@@ -90,10 +90,10 @@ class JiraTools extends StacheElement {
                         const changesForSprint = new ObservableArray();
 
                         const oldSprint = oldSprints.find((oldSprint) => oldSprint.id === sprint.id);
-                        const oldIssues = oldSprint.issues;
+                        const oldIssues = oldSprint && oldSprint.issues;
 
                         sprint.issues.forEach((issue) => {
-                            const oldIssue = oldIssues.flattened[issue.key];
+                            const oldIssue = oldIssues && oldIssues.flattened[issue.key];
                             console.log(issue.key, "OLD status:", oldIssue.fields.status.name, "NEW status:", issue.fields.status.name);
                             if (!oldIssue || oldIssue.fields.status.name !== issue.fields.status.name) {
                                 changesForSprint.push(new ObservableObject({
