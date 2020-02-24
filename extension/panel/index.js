@@ -79,42 +79,46 @@ class JiraTools extends StacheElement {
 
     static props = {
         sprints: type.convert(Sprints),
+        // https://codepen.io/kphillips86/pen/JjdEYLP?editors=0010
+
+        get issueStatuses() {
+            // TODO - need to go through every sprint
+            return this.issues && this.issues.reduce((statuses, issue) => {
+                return {
+                    ...statuses,
+                    [issue.key]: issue.status.name
+                };
+            }, {});
+        },
 
         statusChanges: {
             value({ listenTo, resolve }) {
-                const changes = resolve(new ObservableObject());
-                let oldSprints = this.sprints;
+                resolve([]);
 
-                const updateChanges = ({ value: sprints }) => {
-                    sprints.forEach((sprint) => {
-                        const changesForSprint = new ObservableArray();
+                listenTo("change-issues", () => {
+                    resolve([]);
+                });
 
-                        const oldSprint = oldSprints.find((oldSprint) => oldSprint.id === sprint.id);
-                        const oldIssues = oldSprint && oldSprint.issues;
+                let statuses = this.issueStatuses;
 
-                        sprint.issues.forEach((issue) => {
-                            const oldIssue = oldIssues && oldIssues.flattened[issue.key];
-                            console.log(issue.key, "OLD status:", oldIssue.fields.status.name, "NEW status:", issue.fields.status.name);
-                            if (!oldIssue || oldIssue.fields.status.name !== issue.fields.status.name) {
-                                changesForSprint.push(new ObservableObject({
-                                    oldStatus: oldIssue.fields.status.name,
-                                    newStatus: issue.fields.status.name,
-                                    key: issue.key
-                                }));
+                listenTo("issueStatuses", ({ value }) => {
+                    if (statuses) {
+                        let changes = [];
+
+                        for (let issueKey in value) {
+                            const newStatus = value[issueKey];
+                            const oldStatus = statuses[issueKey];
+
+                            if (newStatus !== oldStatus) {
+                                changes.push({ issueKey, oldStatus, newStatus });
                             }
-                        });
+                        }
 
-                        changes[sprint.id] = changesForSprint;
-                    });
+                        resolve(changes);
+                    }
 
-                    oldSprints = sprints;
-                };
-
-                // set default value
-                updateChanges({ value: oldSprints });
-
-                // update value when sprints changes
-                listenTo("sprints", updateChanges);
+                    statuses = value;
+                });
             }
         }
     }
