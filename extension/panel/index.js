@@ -6,6 +6,8 @@ import {
     type
 } from "../lib/can.js";
 
+import styles from "./styles.js";
+
 class Status extends ObservableObject {
     static props = {
         name: type.maybe(String)
@@ -61,41 +63,48 @@ class Sprints extends ObservableArray {
 
 class JiraTools extends StacheElement {
     static view = `
+        <style>${styles}</style>
        <button on:click="this.getSprints()">Refresh Issues</button>
 
         <h2>Active Sprints</h2>
         {{# for(sprint of this.sprints) }}
-            <h3>{{ sprint.name }}</h3>
-            <p>{{ sprint.issues.length }} issues</p>
-            <h4>Recent status changes:</h4>
-            {{# if(this.statusChanges[sprint.id].length) }}
-                {{# for(change of this.statusChanges[sprint.id]) }}
+            <h3>{{ sprint.name }} - <span>{{ sprint.issues.length }} issues</span></h3>
+
+            {{# if(this.statusChanges[sprint.name].length) }}
+                <h4>Recent status changes:</h4>
+                <ul>
+                {{# for(change of this.statusChanges[sprint.name]) }}
+                    {{! TODO - make this a link to the issue }}
+                    <li>Issue {{ change.issueKey }} changed from {{ change.oldStatus }} to {{ change.newStatus }}</li>
+                    {{! TODO - show who it is assigned to now }}
                 {{/ for }}
-            {{ else }}
-                None
+                </ul>
             {{/ if }}
         {{/ for }}
     `;
 
     static props = {
         sprints: type.convert(Sprints),
-        // https://codepen.io/kphillips86/pen/JjdEYLP?editors=0010
 
         get issueStatuses() {
-            // TODO - need to go through every sprint
-            return this.issues && this.issues.reduce((statuses, issue) => {
+            return this.sprints && this.sprints.reduce((statusesBySprint, sprint) => {
                 return {
-                    ...statuses,
-                    [issue.key]: issue.status.name
+                    ...statusesBySprint,
+                    [sprint.name]: sprint.issues&& sprint.issues.reduce((statuses, issue) => {
+                        return {
+                            ...statuses,
+                            [issue.key]: issue.fields.status.name
+                        };
+                    }, {})
                 };
-            }, {});
+            });
         },
 
         statusChanges: {
             value({ listenTo, resolve }) {
                 resolve([]);
 
-                listenTo("change-issues", () => {
+                listenTo("get-sprints", () => {
                     resolve([]);
                 });
 
@@ -103,15 +112,22 @@ class JiraTools extends StacheElement {
 
                 listenTo("issueStatuses", ({ value }) => {
                     if (statuses) {
-                        let changes = [];
+                        let changes = {};
 
-                        for (let issueKey in value) {
-                            const newStatus = value[issueKey];
-                            const oldStatus = statuses[issueKey];
+                        for (let sprintName in value) {
+                            let changesForSprint = [];
+                            changes[sprintName] = changesForSprint;
 
-                            if (newStatus !== oldStatus) {
-                                changes.push({ issueKey, oldStatus, newStatus });
+                            let sprint = value[sprintName];
+                            for (let issueKey in sprint) {
+                                const newStatus = sprint[issueKey];
+                                const oldStatus = statuses[sprintName][issueKey];
+
+                                if (newStatus !== oldStatus) {
+                                    changesForSprint.push({ issueKey, oldStatus, newStatus });
+                                }
                             }
+
                         }
 
                         resolve(changes);
@@ -121,10 +137,10 @@ class JiraTools extends StacheElement {
                 });
             }
         }
-    }
+    };
 
-    async getSprints() {
-        this.sprints = await jiraData.sprints;
+    getSprints() {
+        this.dispatch("get-sprints");
     }
 
     connected() {
@@ -136,6 +152,11 @@ class JiraTools extends StacheElement {
         this.listenTo("sprints", ({ value }) => {
             localStorage.setItem("saved-sprints", JSON.stringify(value.serialize()));
         })
+
+        this.listenTo("get-sprints", async () => {
+            // TODO - loading indicator
+            this.sprints = await jiraData.sprints;
+        });
     }
 }
 customElements.define("jira-tools", JiraTools);
