@@ -65,7 +65,7 @@ class Sprints extends ObservableArray {
 class JiraTools extends StacheElement {
     static view = `
         <style>${styles}</style>
-       <button on:click="this.getSprints()">Refresh Issues</button>
+        <button on:click="this.getSprints()">Refresh Issues</button>
 
         {{# if(this.loading) }}
             {{ this.loadingIndicator }}
@@ -181,7 +181,13 @@ class JiraTools extends StacheElement {
 
         this.listenTo("get-sprints", async () => {
             this.loading = true;
-            this.sprints.updateDeep(await jiraData.sprints);
+
+            const sprints = await jiraData.sprints;
+            if (this.sprints) {
+                this.sprints.updateDeep(sprints);
+            } else {
+                this.sprints = sprints;
+            }
             this.loading = false;
         });
     }
