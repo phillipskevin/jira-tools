@@ -81,8 +81,7 @@ class JiraTools extends StacheElement {
                     <h4>Recent status changes:</h4>
                     <ul>
                     {{# for(change of this.statusChanges[sprint.name]) }}
-                        <li>Issue <a class="issue-link" target="_blank" href="{{ this.baseUrl }}/browse/{{ change.issueKey }}">{{ change.issueKey }}</a> changed from {{ change.oldStatus }} to {{ change.newStatus }}</li>
-                        {{! TODO - show who it is assigned to now }}
+                        <li>Issue <a class="issue-link" target="_blank" href="{{ this.baseUrl }}/browse/{{ change.issueKey }}">{{ change.issueKey }}</a> changed from {{ change.oldStatus }} ({{ change.oldAssignee }}) to {{ change.newStatus }} ({{ change.newAssignee }})</li>
                     {{/ for }}
                     </ul>
                 {{/ if }}
@@ -111,10 +110,13 @@ class JiraTools extends StacheElement {
             return this.sprints && this.sprints.reduce((statusesBySprint, sprint) => {
                 return {
                     ...statusesBySprint,
-                    [sprint.name]: sprint.issues&& sprint.issues.reduce((statuses, issue) => {
+                    [sprint.name]: sprint.issues && sprint.issues.reduce((statuses, issue) => {
                         return {
                             ...statuses,
-                            [issue.key]: issue.fields.status.name
+                            [issue.key]: {
+                                status: issue.fields.status.name,
+                                assignee: issue.fields.assignee.displayName || "Unassigned"
+                            }
                         };
                     }, {})
                 };
@@ -141,11 +143,14 @@ class JiraTools extends StacheElement {
 
                             let sprint = value[sprintName];
                             for (let issueKey in sprint) {
-                                const newStatus = sprint[issueKey];
-                                const oldStatus = statuses[sprintName][issueKey];
+                                const newStatus = sprint[issueKey].status;
+                                const oldStatus = statuses[sprintName][issueKey].status;
 
-                                if (newStatus !== oldStatus) {
-                                    changesForSprint.push({ issueKey, oldStatus, newStatus });
+                                const newAssignee = sprint[issueKey].assignee;
+                                const oldAssignee = statuses[sprintName][issueKey].assignee;
+
+                                if (newStatus !== oldStatus || newAssignee !== oldAssignee) {
+                                    changesForSprint.push({ issueKey, oldStatus, newStatus, oldAssignee, newAssignee });
                                 }
                             }
 
