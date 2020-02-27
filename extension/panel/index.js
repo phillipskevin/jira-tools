@@ -1,4 +1,5 @@
 import jiraData from "../injected-script-wrapper.js";
+import LoadingIndicator from "../components/loading-indicator.js";
 import {
     StacheElement,
     ObservableArray,
@@ -66,24 +67,36 @@ class JiraTools extends StacheElement {
         <style>${styles}</style>
        <button on:click="this.getSprints()">Refresh Issues</button>
 
-        <h2>Active Sprints</h2>
-        {{# for(sprint of this.sprints) }}
-            <h3>{{ sprint.name }} - <span>{{ sprint.issues.length }} issues</span></h3>
+        {{# if(this.loading) }}
+            {{ this.loadingIndicator }}
+        {{ else }}
+            <h2>Active Sprints</h2>
+            {{# for(sprint of this.sprints) }}
+                <h3>{{ sprint.name }} - <span>{{ sprint.issues.length }} issues</span></h3>
 
-            {{# if(this.statusChanges[sprint.name].length) }}
-                <h4>Recent status changes:</h4>
-                <ul>
-                {{# for(change of this.statusChanges[sprint.name]) }}
-                    {{! TODO - make this a link to the issue }}
-                    <li>Issue {{ change.issueKey }} changed from {{ change.oldStatus }} to {{ change.newStatus }}</li>
-                    {{! TODO - show who it is assigned to now }}
-                {{/ for }}
-                </ul>
-            {{/ if }}
-        {{/ for }}
+                {{# if(this.statusChanges[sprint.name].length) }}
+                    <h4>Recent status changes:</h4>
+                    <ul>
+                    {{# for(change of this.statusChanges[sprint.name]) }}
+                        {{! TODO - make this a link to the issue }}
+                        <li>Issue {{ change.issueKey }} changed from {{ change.oldStatus }} to {{ change.newStatus }}</li>
+                        {{! TODO - show who it is assigned to now }}
+                    {{/ for }}
+                    </ul>
+                {{/ if }}
+            {{/ for }}
+        {{/ if }}
     `;
 
     static props = {
+        loading: false,
+
+        loadingIndicator: {
+            get default() {
+                return new LoadingIndicator();
+            }
+        },
+
         sprints: type.convert(Sprints),
 
         get issueStatuses() {
@@ -154,8 +167,9 @@ class JiraTools extends StacheElement {
         })
 
         this.listenTo("get-sprints", async () => {
-            // TODO - loading indicator
+            this.loading = true;
             this.sprints = await jiraData.sprints;
+            this.loading = false;
         });
     }
 }

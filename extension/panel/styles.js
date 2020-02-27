@@ -4,6 +4,10 @@ const styles = `
             color: white;
         }
     }
+
+    loading-indicator div {
+        margin-top: 10px;
+    }
 `;
 
 export default styles;
