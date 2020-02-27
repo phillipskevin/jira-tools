@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build-can": "node build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,9 +18,7 @@
     "url": "https://github.com/phillipskevin/issue-tracker-tracker/issues"
   },
   "homepage": "https://github.com/phillipskevin/issue-tracker-tracker#readme",
-  "dependencies": {
-    "dotenv": "^8.2.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "can": "^6.3.0",
     "steal-tools": "^2.2.5"
