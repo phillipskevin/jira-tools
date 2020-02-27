@@ -1,5 +1,10 @@
 const handlerMap = {};
 
+const isPromise = (thing) => {
+    return typeof thing === "object" &&
+        Object.keys(thing).length === 0;
+};
+
 // when a property is read, return a promise that reads that property
 // from the injected script and eventually resolves with the value
 // of that property
@@ -19,14 +24,18 @@ const wrapPropertyInPromiseToFetchData = (key) => {
                     return;
                 }
 
-                let handlersForKey = handlerMap[key];
+                if ( isPromise(result) ) {
+                    let handlersForKey = handlerMap[key];
 
-                if (!handlersForKey) {
-                    handlersForKey = [];
-                    handlerMap[key] = handlersForKey;
+                    if (!handlersForKey) {
+                        handlersForKey = [];
+                        handlerMap[key] = handlersForKey;
+                    }
+
+                    handlersForKey.push(resolve);
+                } else {
+                    resolve(result);
                 }
-
-                handlersForKey.push(resolve);
             }
         );
     });

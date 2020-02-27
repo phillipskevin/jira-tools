@@ -69,8 +69,11 @@ class JiraTools extends StacheElement {
 
         {{# if(this.loading) }}
             {{ this.loadingIndicator }}
-        {{ else }}
+        {{/ if }}
+
+        <div {{# if(this.loading) }}style="display: none;"{{/ if }}>
             <h2>Active Sprints</h2>
+
             {{# for(sprint of this.sprints) }}
                 <h3>{{ sprint.name }} - <span>{{ sprint.issues.length }} issues</span></h3>
 
@@ -78,14 +81,13 @@ class JiraTools extends StacheElement {
                     <h4>Recent status changes:</h4>
                     <ul>
                     {{# for(change of this.statusChanges[sprint.name]) }}
-                        {{! TODO - make this a link to the issue }}
-                        <li>Issue {{ change.issueKey }} changed from {{ change.oldStatus }} to {{ change.newStatus }}</li>
+                        <li>Issue <a class="issue-link" target="_blank" href="{{ this.baseUrl }}/browse/{{ change.issueKey }}">{{ change.issueKey }}</a> changed from {{ change.oldStatus }} to {{ change.newStatus }}</li>
                         {{! TODO - show who it is assigned to now }}
                     {{/ for }}
                     </ul>
                 {{/ if }}
             {{/ for }}
-        {{/ if }}
+        </div>
     `;
 
     static props = {
@@ -98,6 +100,12 @@ class JiraTools extends StacheElement {
         },
 
         sprints: type.convert(Sprints),
+
+        baseUrl: {
+            async() {
+                return jiraData.baseUrl;
+            }
+        },
 
         get issueStatuses() {
             return this.sprints && this.sprints.reduce((statusesBySprint, sprint) => {
@@ -168,7 +176,7 @@ class JiraTools extends StacheElement {
 
         this.listenTo("get-sprints", async () => {
             this.loading = true;
-            this.sprints = await jiraData.sprints;
+            this.sprints.updateDeep(await jiraData.sprints);
             this.loading = false;
         });
     }

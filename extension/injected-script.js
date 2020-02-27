@@ -17,6 +17,10 @@
             return urlParams.get("rapidView");
         },
 
+        get baseUrl() {
+            return window.location.origin;
+        },
+
         get activeSprints() {
             return fetch(JIRA_URLS.activeSprints(this.boardId))
                 .then((resp) => resp.json())
