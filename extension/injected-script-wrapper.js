@@ -17,7 +17,7 @@ const wrapPropertyInPromiseToFetchData = (key) => {
             //          type: "sprints",
             //          data: data
             //      });
-            `window.__ISSUE_TRACKER_TRACKER_EXTENSION__.${key}`,
+            `window.__JIRA_TOOLS_EXTENSION__.${key}`,
             function(result, isException) {
                 if (isException) {
                     reject(isException);
@@ -41,7 +41,7 @@ const wrapPropertyInPromiseToFetchData = (key) => {
     });
 };
 
-const backgroundScript = chrome.runtime.connect({ name: "issue-tracker-tracker-background-to-panel" });
+const backgroundScript = chrome.runtime.connect({ name: "jira-tools-background-to-panel" });
 
 backgroundScript.onMessage.addListener((msg, port) => {
     const { type, data } = msg;

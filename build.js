@@ -6,7 +6,7 @@ const baseNormalize = globalJS.normalize();
 const globalBuilds = stealTools.export({
 	steal: {
 		config: __dirname + "/package.json!npm",
-		main: "issue-tracker-tracker/can",
+		main: "jira-tools/can",
 		map: {
 			"can-observable-array": "can-observable-array/dist/can-observable-array",
 			"can-observable-object": "can-observable-object/dist/can-observable-object",
@@ -22,7 +22,7 @@ const globalBuilds = stealTools.export({
 		"+bundled-es core": {
 			addProcessShim: true,
 			dest: __dirname + "/extension/lib/can.js",
-			modules: ["issue-tracker-tracker/can"],
+			modules: ["jira-tools/can"],
             minify: true
 		}
 	}

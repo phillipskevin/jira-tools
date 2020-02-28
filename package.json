@@ -1,5 +1,5 @@
 {
-  "name": "issue-tracker-tracker",
+  "name": "jira-tools",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/phillipskevin/issue-tracker-tracker.git"
+    "url": "git+https://github.com/phillipskevin/jira-tools.git"
   },
   "keywords": [],
   "author": "Kevin Phillips <kphillips86@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/phillipskevin/issue-tracker-tracker/issues"
+    "url": "https://github.com/phillipskevin/jira-tools/issues"
   },
-  "homepage": "https://github.com/phillipskevin/issue-tracker-tracker#readme",
+  "homepage": "https://github.com/phillipskevin/jira-tools#readme",
   "dependencies": {},
   "devDependencies": {
     "can": "^6.3.0",

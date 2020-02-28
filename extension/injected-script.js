@@ -5,13 +5,13 @@
     };
 
     const dispatchDataResponse = detail => {
-        const ev = new CustomEvent("__ISSUE_TRACKER_TRACKER_RESPONSE__", {
+        const ev = new CustomEvent("__JIRA_TOOLS_EVENT__", {
             detail
         });
         document.dispatchEvent(ev);
     };
 
-    window.__ISSUE_TRACKER_TRACKER_EXTENSION__ = {
+    window.__JIRA_TOOLS_EXTENSION__ = {
         get boardId() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get("rapidView");
