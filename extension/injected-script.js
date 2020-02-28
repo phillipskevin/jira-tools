@@ -1,7 +1,8 @@
 (() => {
     const JIRA_URLS = {
-        activeSprints: (boardId) => `/rest/agile/1.0/board/${boardId}/sprint?state=active`,
-        issues: (sprintId) => `/rest/api/2/search?jql=sprint=${sprintId}`
+        activeSprints: (boardId) => `/rest/agile/latest/board/${boardId}/sprint?state=active`,
+        issues: (sprintId) => `/rest/api/latest/search?jql=sprint=${sprintId}`,
+        changelog: (issueId) => `/rest/api/latest/issue/${issueId}?expand=changelog`
     };
 
     const dispatchDataResponse = detail => {
