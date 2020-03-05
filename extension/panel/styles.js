@@ -9,6 +9,10 @@ const styles = `
         margin-top: 10px;
     }
 
+    a.issue-link {
+        color: darkgray;
+    }
+
     a.issue-link:visited {
         color: darkgray;
     }

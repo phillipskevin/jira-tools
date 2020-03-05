@@ -9,7 +9,7 @@ import {
 
 import styles from "./styles.js";
 
-class Status extends ObservableObject {
+class StatusField extends ObservableObject {
     static props = {
         name: type.maybe(String)
     };
@@ -26,7 +26,7 @@ class Fields extends ObservableObject {
         assignee: type.convert(Assignee),
         description: type.maybe(String),
         summary: type.maybe(String),
-        status: type.convert(Status)
+        status: type.convert(StatusField)
     };
 }
 
@@ -39,22 +39,28 @@ class Issue extends ObservableObject {
 
 class Issues extends ObservableArray {
     static items = type.convert(Issue);
+}
 
+class Status extends ObservableObject {
     static props = {
-        get flattened() {
-            return this.reduce((flat, issue) => {
-                flat[issue.key] = issue;
-                return flat;
-            }, {});
-        }
+        key: String,
+        points: type.convert(Number),
+        devComplete: type.convert(String),
+        qaComplete: type.convert(String),
+        done: type.convert(String)
     };
+}
+
+class Statuses extends ObservableArray {
+    static items = type.convert(Status);
 }
 
 class Sprint extends ObservableObject {
     static props = {
         id: Number,
         name: String,
-        issues: type.convert(Issues)
+        issues: type.convert(Issues),
+        statuses: type.convert(Statuses)
     };
 }
 
@@ -75,13 +81,37 @@ class JiraTools extends StacheElement {
             <h2>Active Sprints</h2>
 
             {{# for(sprint of this.sprints) }}
-                <h3>{{ sprint.name }} - <span>{{ sprint.issues.length }} issues</span></h3>
+                <h3>
+                    {{ sprint.name }} - <span>{{ sprint.issues.length }} issues</span>
+                </h3>
+
+                <details>
+                    <summary>Issue Statuses</summary>
+                    <table>
+                        <thead>
+                            <td>Issue</td>
+                            <td>Points</td>
+                            <td>Dev Complete</td>
+                            <td>QA Complete</td>
+                            <td>Done</td>
+                        </thead>
+                        {{# for(issue of sprint.statuses) }}
+                        <tr>
+                            <td>{{ issue.key }}</td>
+                            <td>{{ issue.points }}</td>
+                            <td>{{ this.formatDate(issue.devComplete) }}</td>
+                            <td>{{ this.formatDate(issue.qaComplete) }}</td>
+                            <td>{{ this.formatDate(issue.done) }}</td>
+                        </tr>
+                        {{/ for }}
+                    </table>
+                </details>
 
                 {{# if(this.statusChanges[sprint.name].length) }}
                     <h4>Recent status changes:</h4>
                     <ul>
                     {{# for(change of this.statusChanges[sprint.name]) }}
-                        <li>Issue <a class="issue-link" target="_blank" href="{{ this.baseUrl }}/browse/{{ change.issueKey }}">{{ change.issueKey }}</a> changed from {{ change.oldStatus }} ({{ change.oldAssignee }}) to {{ change.newStatus }} ({{ change.newAssignee }})</li>
+                        <li>Issue <a class="issue-link" target="_blank" rel="noopener" href="{{ this.baseUrl }}/browse/{{ change.issueKey }}">{{ change.issueKey }}</a> changed from {{ change.oldStatus }} ({{ change.oldAssignee }}) to {{ change.newStatus }} ({{ change.newAssignee }})</li>
                     {{/ for }}
                     </ul>
                 {{/ if }}
@@ -144,10 +174,14 @@ class JiraTools extends StacheElement {
                             let sprint = value[sprintName];
                             for (let issueKey in sprint) {
                                 const newStatus = sprint[issueKey].status;
-                                const oldStatus = statuses[sprintName][issueKey].status;
+                                const oldStatus = statuses[sprintName] &&
+                                    statuses[sprintName][issueKey] &&
+                                    statuses[sprintName][issueKey].status;
 
                                 const newAssignee = sprint[issueKey].assignee;
-                                const oldAssignee = statuses[sprintName][issueKey].assignee;
+                                const oldAssignee = statuses[sprintName] &&
+                                    statuses[sprintName][issueKey] &&
+                                    statuses[sprintName][issueKey].assignee;
 
                                 if (newStatus !== oldStatus || newAssignee !== oldAssignee) {
                                     changesForSprint.push({ issueKey, oldStatus, newStatus, oldAssignee, newAssignee });
@@ -164,10 +198,6 @@ class JiraTools extends StacheElement {
             }
         }
     };
-
-    getSprints() {
-        this.dispatch("get-sprints");
-    }
 
     connected() {
         const savedSprints = localStorage.getItem("saved-sprints");
@@ -190,6 +220,21 @@ class JiraTools extends StacheElement {
             }
             this.loading = false;
         });
+    }
+
+    getSprints() {
+        this.dispatch("get-sprints");
+    }
+
+    formatDate(dateString) {
+        if (!dateString) {
+            return "";
+        }
+        const d = new Date(dateString);
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        const year = d.getYear() + 1900;
+        return `${month}-${day}-${year}`;
     }
 }
 customElements.define("jira-tools", JiraTools);

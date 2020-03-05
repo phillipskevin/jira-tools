@@ -42,7 +42,8 @@
                     return {
                         id,
                         name,
-                        issues: await this.getIssuesForSprint(id)
+                        issues: await this.getIssuesForSprint(id),
+                        statuses: await this.getIssueStatuses(id)
                     };
                 })
             );
@@ -59,6 +60,53 @@
                     });
                     return data;
                 });
+        },
+
+        async getIssueChangelog(issueId) {
+            return fetch(JIRA_URLS.changelog(issueId))
+                .then((resp) => resp.json())
+                .then(({ changelog }) => changelog.histories);
+        },
+
+        async getIssueStatuses(sprintId) {
+            const issues = await this.getIssuesForSprint(sprintId);
+
+            const changelogs = await Promise.all(
+                issues.map(async ({ key, fields }) => {
+                    return {
+                        key,
+                        points: fields.customfield_10029 || 0,
+                        changelog: await this.getIssueChangelog(key)
+                    };
+                })
+            );
+
+            const issueStatuses = changelogs.map(({ key, points, changelog }) => {
+                const statusChanges = { key, points };
+
+                changelog.forEach(({ created, items }) => {
+                    items.forEach(({ field, toString }) => {
+                        if (field === "status") {
+                            // TODO - just include all the states here
+                            switch(toString) {
+                                case "QA":
+                                    statusChanges.devComplete = created;
+                                    break;
+                                case "UAT":
+                                    statusChanges.qaComplete = created;
+                                    break;
+                                case "Done":
+                                    statusChanges.done = created;
+                                    break;
+                            }
+                        }
+                    });
+                });
+
+                return statusChanges;
+            });
+
+            return issueStatuses;
         }
     };
 })();
