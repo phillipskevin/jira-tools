@@ -205,10 +205,6 @@ class JiraTools extends StacheElement {
             this.sprints = JSON.parse(savedSprints);
         }
 
-        this.listenTo("sprints", ({ value }) => {
-            localStorage.setItem("saved-sprints", JSON.stringify(value.serialize()));
-        })
-
         this.listenTo("get-sprints", async () => {
             this.loading = true;
 
@@ -218,6 +214,7 @@ class JiraTools extends StacheElement {
             } else {
                 this.sprints = sprints;
             }
+            localStorage.setItem("saved-sprints", JSON.stringify(sprints));
             this.loading = false;
         });
     }
