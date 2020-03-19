@@ -45,9 +45,11 @@ class Status extends ObservableObject {
     static props = {
         key: String,
         points: type.convert(Number),
-        devComplete: type.convert(String),
-        qaComplete: type.convert(String),
-        done: type.convert(String)
+        "In Development": type.maybeConvert(String),
+        "Review": type.maybeConvert(String),
+        "QA": type.maybeConvert(String),
+        "UAT": type.maybeConvert(String),
+        "Done": type.maybeConvert(String)
     };
 }
 
@@ -90,18 +92,22 @@ class JiraTools extends StacheElement {
                     <table>
                         <thead>
                             <td>Issue</td>
-                            <td>Points</td>
-                            <td>Dev Complete</td>
-                            <td>QA Complete</td>
+                            <td>Story Points</td>
+                            <td>Dev Started</td>
+                            <td>Ready for Review</td>
+                            <td>Ready for QA</td>
+                            <td>Ready for UAT</td>
                             <td>Done</td>
                         </thead>
                         {{# for(issue of sprint.statuses) }}
                         <tr>
                             <td>{{ issue.key }}</td>
                             <td>{{ issue.points }}</td>
-                            <td>{{ this.formatDate(issue.devComplete) }}</td>
-                            <td>{{ this.formatDate(issue.qaComplete) }}</td>
-                            <td>{{ this.formatDate(issue.done) }}</td>
+                            <td>{{ this.formatDate(issue["In Development"]) }}</td>
+                            <td>{{ this.formatDate(issue["Review"]) }}</td>
+                            <td>{{ this.formatDate(issue["QA"]) }}</td>
+                            <td>{{ this.formatDate(issue["UAT"]) }}</td>
+                            <td>{{ this.formatDate(issue["Done"]) }}</td>
                         </tr>
                         {{/ for }}
                     </table>

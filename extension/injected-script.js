@@ -87,18 +87,7 @@
                 changelog.forEach(({ created, items }) => {
                     items.forEach(({ field, toString }) => {
                         if (field === "status") {
-                            // TODO - just include all the states here
-                            switch(toString) {
-                                case "QA":
-                                    statusChanges.devComplete = created;
-                                    break;
-                                case "UAT":
-                                    statusChanges.qaComplete = created;
-                                    break;
-                                case "Done":
-                                    statusChanges.done = created;
-                                    break;
-                            }
+                          statusChanges[toString] = created;
                         }
                     });
                 });
