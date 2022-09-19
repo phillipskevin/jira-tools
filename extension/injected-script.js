@@ -14,8 +14,9 @@
 
     window.__JIRA_TOOLS_EXTENSION__ = {
         get boardId() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get("rapidView");
+          //const urlParams = new URLSearchParams(window.location.search);
+          //return urlParams.get("rapidView");
+          return 41;
         },
 
         get baseUrl() {
